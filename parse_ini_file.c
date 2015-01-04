@@ -51,18 +51,18 @@ char **str_split(char *src, size_t strlen, const char *delm, size_t delmlen)
 
 ini *make_ini(const char *key, const char *value)
 {
-    ini *init = (ini *)malloc(sizeof(ini));
-    strcpy(init->key, key);
-    strcpy(init->value, value);
+    ini *node = (ini *)malloc(sizeof(ini));
+    strcpy(node->key, key);
+    strcpy(node->value, value);
     
-    init->next = NULL;
-    return init;
+    node->next = NULL;
+    return node;
 }
 
-void ini_set(ini **init, ini *i)
+void ini_set(ini **node, ini *i)
 {
-    i->next = *init;
-    *init = i;
+    i->next = *node;
+    *node = i;
 }
 
 ini *parse_ini_file(const char *filename)
@@ -76,12 +76,12 @@ ini *parse_ini_file(const char *filename)
     
     char *d = "=";
     size_t dlen = strlen(d);
-    ini *init = (ini *)malloc(sizeof(ini));
-    if (!init) {
+    ini *node = (ini *)malloc(sizeof(ini));
+    if (!node) {
         return NULL;
     }
     
-    while (fgets(line, 1025, fp)) {
+    while (fgets(line, 1024, fp)) {
         if (strlen(line)<=1) {
             continue;
         }
@@ -91,27 +91,71 @@ ini *parse_ini_file(const char *filename)
             continue;
         }
         
+        trim(rst[0]);
+        trim(rst[1]);
         if (!rst[1]) {
             free(rst);
             continue;
         }
         
-        ini_set(&init, make_ini(rst[0], rst[1]));
+        ini_set(&node, make_ini(rst[0], rst[1]));
         free(rst);
     }
     
-    return init;
+    return node;
 }
 
 char *ini_get(ini *init, char *key)
 {
-    ini *ini_item = init;
-    while (ini_item) {
-        if (strcmp(ini_item->key, key) == 0) {
-            return ini_item->value;
+    ini *node = init;
+    while (node) {
+        if (strcmp(node->key, key) == 0) {
+            return node->value;
         }
-        ini_item = ini_item->next;
+        node = node->next;
     }
     
     return NULL;
+}
+
+void ini_destroy(ini *init)
+{
+    ini *node = init, *tmp = NULL;
+    while (node) {
+        tmp = node;
+        node = node->next;
+        free(tmp);
+    }
+}
+
+char *last_char_is(const char *s, int c)
+{
+    char *sret;
+    if (!s)
+        return NULL;
+    sret = (char *)s+strlen(s)-1;
+    if (sret>=s && *sret == c)
+        return sret;
+    else
+        return NULL;
+}
+
+void chomp(char *s)
+{
+    char *lc = last_char_is(s, '\n');
+
+    if(lc)
+        *lc = 0;
+}
+
+void trim(char *s)
+{
+    int len = strlen(s);
+
+    /* trim trailing whitespace */
+    while ( len > 0 && isspace(s[len-1]))
+        s[--len]='\0';
+
+    /* trim leading whitespace */
+    memmove(s, &s[strspn(s, " \n\r\t\v")], len);
 }

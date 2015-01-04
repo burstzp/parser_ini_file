@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <ctype.h>
 
 typedef struct _ini {
     char key[50];
@@ -25,5 +26,9 @@ ini *make_ini(const char *key, const char *value);
 void ini_set(ini **init, ini *i);
 ini *parse_ini_file(const char *filename);
 char *ini_get(ini *init, char *key);
+void ini_destroy(ini *init);
+char *last_char_is(const char* , int);
+void chomp(char *);
+void trim(char *s);
 
 #endif /* defined(__paser_ini_file__parse_ini_file__) */
