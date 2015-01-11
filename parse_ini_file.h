@@ -1,34 +1,25 @@
 //
-//  parse_ini_file.h
-//  paser_ini_file
+//  ini.h
+//  ini
 //
-//  Created by 易国磐 on 15-1-3.
+//  Created by 易国磐 on 15-1-9.
 //  Copyright (c) 2015年 易国磐. All rights reserved.
 //
 
-#ifndef __paser_ini_file__parse_ini_file__
-#define __paser_ini_file__parse_ini_file__
+#ifndef ini_ini_h
+#define ini_ini_h
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <ctype.h>
-
-typedef struct _ini {
-    char key[50];
-    char value[255];
+typedef struct _ini
+{
+    char key[32];
     struct _ini *next;
+    struct _ini_params *ini_params_t;
 } ini;
 
-char **str_split(char *src, size_t strlen, const char *delm, size_t delmlen);
-ini *make_ini(const char *key, const char *value);
-void ini_set(ini **init, ini *i);
-ini *parse_ini_file(const char *filename);
-char *ini_get(ini *init, char *key);
-void ini_destroy(ini *init);
-char *last_char_is(const char* , int);
-void chomp(char *);
-void trim(char *s);
-
-#endif /* defined(__paser_ini_file__parse_ini_file__) */
+typedef struct _ini_params
+{
+    char key[32];
+    char value[128];
+    struct _ini_params *next;
+} ini_params;
+#endif
