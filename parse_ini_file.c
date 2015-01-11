@@ -19,53 +19,6 @@
 #define Z_SUCCESS             0
 #define RETURN_NULL          return NULL
 
-char **str_split(char *src, size_t strlen, const char *delm, size_t delmlen)
-{
-    // 需要修改字符串，提前复制数据源
-    char *str = (char *)malloc(sizeof(char) * strlen + 1);
-    if (!str) RETURN_NULL;
-    
-    memcpy(str, src, strlen);
-    int i = 0;
-    int c = 0;
-    for (; i <  strlen; ++i) {
-        if (memcmp(str+i, delm, delmlen) == 0) {
-            ++c;
-        }
-    }
-    
-    if (c == 0) {
-        return NULL;
-    }
-    
-    char **res = (char **)malloc(sizeof(char*) * c);
-    res[0] = str;
-    int j;
-    for (j=1, i = 0; i < strlen; i++) {
-        if (memcmp(str+i, delm, delmlen) == 0) {
-            res[j-1][i] = '\0';
-            res[j++] = str + i + delmlen;
-        }
-    }
-    *(str + i) = '\0';
-    free(str);
-    return res;
-}
-
-
-int is_empty(const char *str)
-{
-    size_t len = strlen(str);
-    int i;
-    for (i = 0; i < len; i++) {
-        if (!*(str+i)) {
-            return Z_ERROR;
-        }
-    }
-    
-    return Z_SUCCESS;
-}
-
 int strpos(const char *str, const char *find)
 {
     size_t findlen = strlen(find);
@@ -179,9 +132,33 @@ ini *ini_search(ini *init_t, const char *section)
     RETURN_NULL;
 }
 
-char *ini_get(ini *init_t, const char *section, const char *key)
+const char *get_section_key(const char *key)
 {
+    size_t keylen = strlen(key);
+    if (key[0] == '[' && key[keylen - 1] == ']') {
+        return key;
+    }
     
+    char str[50];// = (char *)malloc(sizeof(char) * keylen);
+    int i = 1;
+    *str = '[';
+    while (*key) {
+        if (*key != '[' && *key != ']') {
+            *(str + i) = *key;
+            i++;
+        }
+        key++;
+    }
+    
+    *(str + i++) = ']';
+    *(str + i)   = '\0';
+    
+    return str;
+}
+
+char *ini_get(ini *init_t, const char *section_key, const char *key)
+{
+    const char *section = get_section_key(section_key);
     size_t sectionlen = strlen(section);
     for (; init_t; init_t = init_t->next) {
         if (!memcmp(init_t->key, section, sectionlen)) {
@@ -263,7 +240,8 @@ ini *parse_ini_file(const char *filename)
 int main(int argc, const char * argv[]) {
     ini *ini_t = parse_ini_file("/Users/ekikokuiwa/data/code/c/ini/ini/a.ini");
     printf("value = %s\n", ini_get(ini_t, "[redis]", "host"));
-    printf("value = %s\n", ini_get(ini_t, "[db]", "host"));
+    printf("value = %s\n", ini_get(ini_t, "db", "port"));
+    printf("value = %s\n", ini_get(ini_t, "[mc]", "timeout"));
 
     destroy_ini(ini_t);
     return 0;
