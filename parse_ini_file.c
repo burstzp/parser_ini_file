@@ -236,13 +236,25 @@ ini *parse_ini_file(const char *filename)
     fclose(fp);
     return ini_t;
 }
+void visit_section(ini *ini_t)
+{
+    printf("%s\n", ini_t->key);
+}
 
+void print_ini_list(ini *ini_t, void (*visit_section)(ini*))
+{
+    for (; ini_t; ini_t = ini_t->next) {
+        visit_section(ini_t);
+        print_ini_params_list(ini_t->ini_params_t, visit);
+    }
+}
 int main(int argc, const char * argv[]) {
     ini *ini_t = parse_ini_file("/Users/ekikokuiwa/data/code/c/ini/ini/a.ini");
     printf("value = %s\n", ini_get(ini_t, "[redis]", "host"));
     printf("value = %s\n", ini_get(ini_t, "db", "port"));
     printf("value = %s\n", ini_get(ini_t, "[mc]", "timeout"));
-
+    
+    print_ini_list(ini_t, visit_section);
     destroy_ini(ini_t);
     return 0;
 }
