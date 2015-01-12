@@ -36,7 +36,7 @@ int strpos(const char *str, const char *find)
 
 ini_params *create_ini_params(const char *key, const char *value)
 {
-    if (is_empty(key) || is_empty(value)) {
+    if (!key || !value) {
         RETURN_NULL;
     }
     
@@ -63,7 +63,7 @@ void add_ini_params_node(ini_params **ini_params_t, ini_params *node)
 
 void visit(ini_params *ini_params_t)
 {
-    printf("ini_param key = %s, value = %s\n", ini_params_t->key, ini_params_t->value);
+    printf("%s = %s\n", ini_params_t->key, ini_params_t->value);
 }
 
 void print_ini_params_list(ini_params *ini_params_t, void (*visit)(ini_params*))
@@ -109,8 +109,8 @@ ini *create_ini(const char *key, ini_params *ini_params_t)
     
     memcpy(ini_t->key, key, strlen(key));
     
-    ini_t->ini_params_t = NULL;
-    add_ini_params_node(&ini_t->ini_params_t, ini_params_t);
+    ini_t->ini_params_t = ini_params_t;
+    //add_ini_params_node(&ini_t->ini_params_t, ini_params_t);
     return ini_t;
 }
 
@@ -132,14 +132,15 @@ ini *ini_search(ini *init_t, const char *section)
     RETURN_NULL;
 }
 
-const char *get_section_key(const char *key)
+char *get_section_key(char *key)
 {
     size_t keylen = strlen(key);
     if (key[0] == '[' && key[keylen - 1] == ']') {
         return key;
     }
     
-    char str[50];// = (char *)malloc(sizeof(char) * keylen);
+    char str[50] = {0};
+    memset(str, 0, strlen(str));
     int i = 1;
     *str = '[';
     while (*key) {
@@ -149,16 +150,17 @@ const char *get_section_key(const char *key)
         }
         key++;
     }
-    
-    *(str + i++) = ']';
-    *(str + i)   = '\0';
-    
-    return str;
+    strcat(str, "]\0");
+    memset(key, 0, strlen(key));
+    memcpy(key, str, sizeof(str));
+    return key;
 }
 
 char *ini_get(ini *init_t, const char *section_key, const char *key)
 {
-    const char *section = get_section_key(section_key);
+    char seckey[50] = {0};
+    memcpy(seckey, section_key, strlen(section_key));
+    char *section = get_section_key(seckey);
     size_t sectionlen = strlen(section);
     for (; init_t; init_t = init_t->next) {
         if (!memcmp(init_t->key, section, sectionlen)) {
@@ -236,6 +238,7 @@ ini *parse_ini_file(const char *filename)
     fclose(fp);
     return ini_t;
 }
+
 void visit_section(ini *ini_t)
 {
     printf("%s\n", ini_t->key);
