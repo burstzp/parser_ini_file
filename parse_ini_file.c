@@ -251,6 +251,7 @@ void print_ini_list(ini *ini_t, void (*visit_section)(ini*))
         print_ini_params_list(ini_t->ini_params_t, visit);
     }
 }
+#if DEBUG
 int main(int argc, const char * argv[]) {
     ini *ini_t = parse_ini_file("/Users/ekikokuiwa/data/code/c/ini/ini/a.ini");
     printf("value = %s\n", ini_get(ini_t, "[redis]", "host"));
@@ -261,3 +262,4 @@ int main(int argc, const char * argv[]) {
     destroy_ini(ini_t);
     return 0;
 }
+#endif
