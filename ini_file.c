@@ -6,7 +6,21 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#include <unistd.h>
+
 const int MAX_INI_FILE_BUF_SIZE = 10240;
+
+int is_pair_value(const char* sp, const char *ep, const char **pos) {
+   while (sp<ep) {
+        if (*sp=='=') {
+            *pos = sp;
+            return 1;
+        }
+        sp++;
+   }
+
+   return 0;
+}
 
 char* load_ini_file(char* file_path, int* total_bytes) {
     assert(file_path != NULL);
@@ -62,7 +76,6 @@ void read_section_string(const char* buf, int total_bytes , char* section, char*
     assert(result!=NULL);
 
     int i = 0;
-    int m = strlen(buf);
     const char *sp = buf;
     const char *ep = buf;
 
@@ -84,7 +97,7 @@ void read_section_string(const char* buf, int total_bytes , char* section, char*
             continue;
         }
 
-        char *pos=NULL;
+        const char *pos=NULL;
         if (found && is_pair_value(sp, ep, &pos)) {
             if (memcmp(key,sp,pos-sp) == 0) {
                 memcpy(result,pos+1,ep-pos);
@@ -113,17 +126,6 @@ void read_section_string(const char* buf, int total_bytes , char* section, char*
     }
 }
 
-int is_pair_value(char* sp, char *ep, char **pos) {
-   while (sp<ep) {
-        if (*sp=='=') {
-            *pos = sp;
-            return 1;
-        }
-        sp++;
-   }
-
-   return 0;
-}
 
 
 
