@@ -89,6 +89,14 @@ void read_section_string(const char* buf, int total_bytes , char* section, char*
             continue;
         }
 
+        if (buf[i]==';') {
+             while(*sp!='\r' || *sp!='\n') {
+                sp++;
+                ep++;
+                continue;
+             }
+        }
+
         while(*sp != '\0' && (*sp==' ' || *sp=='\r' || *sp=='\n' || *sp=='\t')) sp++;
         while(*ep != '\0' && (*ep==' ' || *ep=='\r' || *ep=='\n' || *ep=='\t')) ep--;
 
@@ -127,8 +135,4 @@ void read_section_string(const char* buf, int total_bytes , char* section, char*
         sp++;
     }
 }
-
-
-
-
 
