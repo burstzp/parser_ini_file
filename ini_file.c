@@ -58,17 +58,17 @@ void ini_file_buffer_free(char* buf) {
 
 int read_section_int(const char* buf,int total_bytes , char* section, char* key) {
     char result[4]={0};
-    read_section_string(buf, total_bytes, section,key, result);
+    read_section_string(buf, total_bytes, section,key, result,4);
     return atoi(result);
 }
 
 long read_section_long(const char* buf,int total_bytes , char* section, char* key) {
     char result[8]={0};
-    read_section_string(buf, total_bytes, section,key, result);
+    read_section_string(buf, total_bytes, section,key, result,8);
     return atol(result);
 }
 
-void read_section_string(const char* buf, int total_bytes , char* section, char* key, char* result) {
+void read_section_string(const char* buf, int total_bytes , char* section, char* key, char* result,int result_len) {
     assert(total_bytes>1);
     assert(buf!=NULL);
     assert(section!=NULL);
@@ -100,8 +100,10 @@ void read_section_string(const char* buf, int total_bytes , char* section, char*
         const char *pos=NULL;
         if (found && is_pair_value(sp, ep, &pos)) {
             if (memcmp(key,sp,pos-sp) == 0) {
+                if (result_len<(ep-pos-1)) {
+                    break;
+                }
                 memcpy(result,pos+1,ep-pos);
-                result[ep-pos+1]='\0';
                 break;
             }
         } else {
