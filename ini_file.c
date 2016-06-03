@@ -91,9 +91,7 @@ void read_section_string(const char* buf, int total_bytes , char* section, char*
 
         if (buf[i]==';') {
              while(*sp!='\r' || *sp!='\n') {
-                sp++;
-                ep++;
-                continue;
+                sp++; ep++;
              }
         }
 
